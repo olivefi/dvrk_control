@@ -31,9 +31,9 @@ protected:
   geometry_msgs::WrenchStamped wrenchToDVRKFrame(const geometry_msgs::WrenchStamped &wrench, const geometry_msgs::TransformStamped &dvrkTrans);
   geometry_msgs::TransformStamped dvrkPoseToNormal(const geometry_msgs::TransformStamped &dvrkTrans);
   geometry_msgs::TwistStamped dvrkTwistToNormal(const geometry_msgs::TwistStamped &twist);
-
   geometry_msgs::WrenchStamped createImpdCmd(const geometry_msgs::TransformStamped &currPose, const geometry_msgs::TransformStamped &desPose,
                                 const geometry_msgs::TwistStamped &currTwist, const geometry_msgs::TwistStamped &desTwist);
+  geometry_msgs::TransformStamped createTransformError(const geometry_msgs::TransformStamped &desPose, const geometry_msgs::TransformStamped &currPose);
   // Coord frame transforms
   Eigen::Matrix3d dvrkCoordToNormalCoord_ = Eigen::Matrix3d::Identity();
   Eigen::Matrix3d normalCoordToDvrkCoord_ = Eigen::Matrix3d::Identity();

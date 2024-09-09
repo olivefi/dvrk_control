@@ -208,7 +208,7 @@ geometry_msgs::TwistStamped DVRKControl::dvrkTwistToNormal(const geometry_msgs::
   return normalTwist;
 }
 
-geometry_msgs::TransformStamped DVRKControl::createTransformError(geometry_msgs::TransformStamped a, geometry_msgs::TransformStamped b){
+geometry_msgs::TransformStamped DVRKControl::createTransformError(const geometry_msgs::TransformStamped& a, const geometry_msgs::TransformStamped& b){
   geometry_msgs::TransformStamped error;
   error.header.stamp = ros::Time::now();
   error.transform.translation.x = a.transform.translation.x - b.transform.translation.x;
