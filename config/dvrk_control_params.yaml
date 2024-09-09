@@ -2,6 +2,6 @@ publish_rate: 200 # Hz, at which everything is republished from node
 
 # Controller gains
 p_gain_pos: 50
-p_gain_ori: 50
-d_gain_pos: 0.1
+p_gain_ori: 0.5
+d_gain_pos: 5.0
 d_gain_ori: 0.1

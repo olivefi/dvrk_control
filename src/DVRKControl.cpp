@@ -133,6 +133,8 @@ geometry_msgs::WrenchStamped DVRKControl::createImpdCmd(const geometry_msgs::Tra
   cmd.wrench.torque.x = angvelCmd(0);
   cmd.wrench.torque.y = angvelCmd(1);
   cmd.wrench.torque.z = angvelCmd(2);
+  ROS_INFO_STREAM("Pos error: " << posErr.transpose());
+  ROS_INFO_STREAM("Vel error: " << velErr.transpose());
   return cmd;
 }
 
