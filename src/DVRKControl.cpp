@@ -98,7 +98,7 @@ bool DVRKControl::update(const any_worker::WorkerEvent &event) {
   rightErrorPub_.publish(createTransformError(desPoseRight_, dvrkPoseRight_));
 
   dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, rawDvrkPoseLeft_));
-  dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, dvrkPoseRight_));
+  dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, rawDvrkPoseRight_));
 
   return true;
 }
