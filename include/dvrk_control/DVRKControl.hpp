@@ -12,10 +12,13 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
+#include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <tf2_ros/transform_broadcaster.h>
 
 namespace dvrk_control {
+
+enum class ControlMode { POSE, WRENCH, UNKNOWN};
 
 class DVRKControl : public any_node::Node {
 public:
@@ -44,10 +47,14 @@ protected:
   double dGainPos_, dGainOri_;
 
   // Internal variables
+  ControlMode controlMode_ = ControlMode::POSE;
+
   geometry_msgs::TransformStamped dvrkPoseLeft_;
   geometry_msgs::TransformStamped dvrkPoseRight_;
   geometry_msgs::TwistStamped dvrkTwistLeft_;
   geometry_msgs::TwistStamped dvrkTwistRight_;
+  geometry_msgs::WrenchStamped wrenchLeft_;
+  geometry_msgs::WrenchStamped wrenchRight_;
 
   // Raw dvrk is in their fucked up frame
   geometry_msgs::TransformStamped rawDvrkPoseLeft_;
@@ -66,6 +73,10 @@ protected:
   void controlPoseLeftCallback(const geometry_msgs::TransformStamped::ConstPtr &msg);
   void controlPoseRightCallback(const geometry_msgs::TransformStamped::ConstPtr &msg);
 
+  void wrenchLeftCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
+  void wrenchRightCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
+
+  void controlModeCallback(const std_msgs::String::ConstPtr &msg);
 
   // Publishers
   ros::Publisher leftGravcompPub_;
@@ -77,7 +88,12 @@ protected:
   ros::Publisher dvrkLeftWrenchPub_;
   ros::Publisher dvrkRightWrenchPub_;
 
+  ros::Publisher leftErrorPub_;
+  ros::Publisher rightErrorPub_;
+
   // Subscribers
+  ros::Subscriber controlmodeSub_;
+
   ros::Subscriber dvrkPoseLeftSub_;
   ros::Subscriber dvrkPoseRightSub_;
 
@@ -87,7 +103,7 @@ protected:
   ros::Subscriber desPoseLeftSub_;
   ros::Subscriber desPoseRightSub_;
 
-  ros::Publisher leftErrorPub_;
-  ros::Publisher rightErrorPub_;
+  ros::Subscriber wrenchLeftSub_;
+  ros::Subscriber wrenchRightSub_;
 };
 } /* namespace dvrk_control */

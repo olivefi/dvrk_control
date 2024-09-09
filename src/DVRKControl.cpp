@@ -28,14 +28,17 @@ bool DVRKControl::init() {
       "left/pose_des", 1, &DVRKControl::controlPoseLeftCallback, this);
   desPoseRightSub_ = nh_->subscribe(
       "right/pose_des", 1, &DVRKControl::controlPoseRightCallback, this);
+  wrenchLeftSub_ = nh_->subscribe("left/wrench_des", 1, &DVRKControl::wrenchLeftCallback, this);
+  wrenchRightSub_ = nh_->subscribe("right/wrench_des", 1, &DVRKControl::wrenchRightCallback, this);
+  controlmodeSub_ = nh_->subscribe("control_mode", 1, &DVRKControl::controlModeCallback, this);
 
   // Initialize publishers
   dvrkLeftWrenchPub_ =
       nh_->advertise<geometry_msgs::WrenchStamped>("/MTML/body/servo_cf", 1);
   dvrkRightWrenchPub_ =
       nh_->advertise<geometry_msgs::WrenchStamped>("/MTMR/body/servo_cf", 1);
-  leftErrorPub_ = nh_->advertise<geometry_msgs::TransformStamped>("error/left", 1);
-  rightErrorPub_ = nh_->advertise<geometry_msgs::TransformStamped>("error/right", 1);
+  leftErrorPub_ = nh_->advertise<geometry_msgs::TransformStamped>("left/error", 1);
+  rightErrorPub_ = nh_->advertise<geometry_msgs::TransformStamped>("right/error", 1);
   leftGravcompPub_ = nh_->advertise<std_msgs::Bool>("/MTML/enable_gravity_compensation", 1);
   rightGravcompPub_ = nh_->advertise<std_msgs::Bool>("/MTMR/enable_gravity_compensation", 1);
   currPoseLeftPub_ = nh_->advertise<geometry_msgs::TransformStamped>("left/pose_curr", 1);
@@ -91,11 +94,21 @@ bool DVRKControl::update(const any_worker::WorkerEvent &event) {
   currPoseLeftPub_.publish(dvrkPoseLeft_);
   currPoseRightPub_.publish(dvrkPoseRight_);
 
-  geometry_msgs::WrenchStamped leftCmd = createImpdCmd(dvrkPoseLeft_, desPoseLeft_, dvrkTwistLeft_, geometry_msgs::TwistStamped());
-  geometry_msgs::WrenchStamped rightCmd = createImpdCmd(dvrkPoseRight_, desPoseRight_, dvrkTwistRight_, geometry_msgs::TwistStamped());
-
   leftErrorPub_.publish(createTransformError(desPoseLeft_, dvrkPoseLeft_));
   rightErrorPub_.publish(createTransformError(desPoseRight_, dvrkPoseRight_));
+
+  geometry_msgs::WrenchStamped leftCmd, rightCmd;
+
+  if (controlMode_ == ControlMode::POSE) {
+    leftCmd = createImpdCmd(dvrkPoseLeft_, desPoseLeft_, dvrkTwistLeft_, geometry_msgs::TwistStamped());
+    rightCmd = createImpdCmd(dvrkPoseRight_, desPoseRight_, dvrkTwistRight_, geometry_msgs::TwistStamped());
+  } else if (controlMode_ == ControlMode::WRENCH) {
+    leftCmd = wrenchLeft_;
+    rightCmd = wrenchRight_;
+  } else {
+    ROS_ERROR_STREAM("[DVRKControl] Unknown control mode");
+    return false;
+  }
 
   dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, rawDvrkPoseLeft_));
   dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, rawDvrkPoseRight_));
@@ -265,6 +278,26 @@ void DVRKControl::controlPoseLeftCallback(
 void DVRKControl::controlPoseRightCallback(
     const geometry_msgs::TransformStamped::ConstPtr &msg) {
   desPoseRight_ = *msg;
+}
+
+void DVRKControl::wrenchLeftCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg){
+  geometry_msgs::WrenchStamped wrench = *msg;
+  geometry_msgs::WrenchStamped leftWrench_ = wrenchToDVRKFrame(wrench, rawDvrkPoseLeft_);
+}
+
+void DVRKControl::wrenchRightCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg){
+  geometry_msgs::WrenchStamped wrench = *msg;
+  geometry_msgs::WrenchStamped rightWrench_ = wrenchToDVRKFrame(wrench, rawDvrkPoseRight_);
+}
+
+void DVRKControl::controlModeCallback(const std_msgs::String::ConstPtr &msg){
+  if(msg->data.c_str() == "pose"){
+    controlMode_ = ControlMode::POSE;
+  } else if(msg->data.c_str() == "wrench"){
+    controlMode_ = ControlMode::WRENCH;
+  } else {
+    controlMode_ = ControlMode::UNKNOWN;
+  }
 }
 
 } /* namespace dvrk_control */
