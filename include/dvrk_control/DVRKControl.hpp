@@ -49,6 +49,10 @@ protected:
   geometry_msgs::TwistStamped dvrkTwistLeft_;
   geometry_msgs::TwistStamped dvrkTwistRight_;
 
+  // Raw dvrk is in their fucked up frame
+  geometry_msgs::TransformStamped rawDvrkPoseLeft_;
+  geometry_msgs::TransformStamped rawDvrkPoseRight_;
+
   geometry_msgs::TransformStamped desPoseLeft_;
   geometry_msgs::TransformStamped desPoseRight_;
 

@@ -92,8 +92,9 @@ bool DVRKControl::update(const any_worker::WorkerEvent &event) {
   currPoseRightPub_.publish(dvrkPoseRight_);
 
   geometry_msgs::WrenchStamped leftCmd = createImpdCmd(dvrkPoseLeft_, desPoseLeft_, dvrkTwistLeft_, geometry_msgs::TwistStamped());
+
   geometry_msgs::WrenchStamped rightCmd = createImpdCmd(dvrkPoseRight_, desPoseRight_, dvrkTwistRight_, geometry_msgs::TwistStamped());
-  dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, dvrkPoseLeft_));
+  dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, rawDvrkPoseLeft_));
   // dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, dvrkPoseRight_));
 
   return true;
@@ -207,12 +208,14 @@ geometry_msgs::TwistStamped DVRKControl::dvrkTwistToNormal(const geometry_msgs::
 void DVRKControl::dvrkPoseLeftCallback(
     const geometry_msgs::TransformStamped::ConstPtr &msg) {
   geometry_msgs::TransformStamped dvrkPoseLeft = *msg;
+  rawDvrkPoseLeft_ = dvrkPoseLeft;
   dvrkPoseLeft_ = dvrkPoseToNormal(dvrkPoseLeft);
 }
 
 void DVRKControl::dvrkPoseRightCallback(
     const geometry_msgs::TransformStamped::ConstPtr &msg) {
   geometry_msgs::TransformStamped dvrkPoseRight = *msg;
+  rawDvrkPoseRight_ = dvrkPoseRight;
   dvrkPoseRight_ = dvrkPoseToNormal(dvrkPoseRight);
 }
 
