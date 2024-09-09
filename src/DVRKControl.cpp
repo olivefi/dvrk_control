@@ -94,7 +94,7 @@ bool DVRKControl::update(const any_worker::WorkerEvent &event) {
   geometry_msgs::WrenchStamped leftCmd = createImpdCmd(dvrkPoseLeft_, desPoseLeft_, dvrkTwistLeft_, geometry_msgs::TwistStamped());
   geometry_msgs::WrenchStamped rightCmd = createImpdCmd(dvrkPoseRight_, desPoseRight_, dvrkTwistRight_, geometry_msgs::TwistStamped());
   dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, dvrkPoseLeft_));
-  dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, dvrkPoseRight_));
+  // dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, dvrkPoseRight_));
 
   return true;
 }
