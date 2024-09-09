@@ -59,9 +59,9 @@ bool DVRKControl::init() {
 
   geometry_msgs::TransformStamped zeroPose;
   zeroPose.header.stamp = ros::Time::now();
-  zeroPose.transform.translation.x = -0.35;
+  zeroPose.transform.translation.x = -0.40;
   zeroPose.transform.translation.y = 0.0;
-  zeroPose.transform.translation.z = -0.14;
+  zeroPose.transform.translation.z = -0.1;
   zeroPose.transform.rotation.x = 1.0;
   zeroPose.transform.rotation.y = 0.0;
   zeroPose.transform.rotation.z = 0.0;
@@ -92,10 +92,13 @@ bool DVRKControl::update(const any_worker::WorkerEvent &event) {
   currPoseRightPub_.publish(dvrkPoseRight_);
 
   geometry_msgs::WrenchStamped leftCmd = createImpdCmd(dvrkPoseLeft_, desPoseLeft_, dvrkTwistLeft_, geometry_msgs::TwistStamped());
-
   geometry_msgs::WrenchStamped rightCmd = createImpdCmd(dvrkPoseRight_, desPoseRight_, dvrkTwistRight_, geometry_msgs::TwistStamped());
+
+  leftErrorPub_.publish(createTransformError(desPoseLeft_, dvrkPoseLeft_));
+  rightErrorPub_.publish(createTransformError(desPoseRight_, dvrkPoseRight_));
+
   dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, rawDvrkPoseLeft_));
-  // dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, dvrkPoseRight_));
+  dvrkRightWrenchPub_.publish(wrenchToDVRKFrame(rightCmd, dvrkPoseRight_));
 
   return true;
 }
@@ -203,6 +206,29 @@ geometry_msgs::TwistStamped DVRKControl::dvrkTwistToNormal(const geometry_msgs::
   normalTwist.twist.angular.y = angVel(1);
   normalTwist.twist.angular.z = angVel(2);
   return normalTwist;
+}
+
+geometry_msgs::TransformStamped DVRKControl::createTransformError(geometry_msgs::TransformStamped a, geometry_msgs::TransformStamped b){
+  geometry_msgs::TransformStamped error;
+  error.header.stamp = ros::Time::now();
+  error.transform.translation.x = a.transform.translation.x - b.transform.translation.x;
+  error.transform.translation.y = a.transform.translation.y - b.transform.translation.y;
+  error.transform.translation.z = a.transform.translation.z - b.transform.translation.z;
+  Eigen::Quaterniond q1, q2;
+  q1.x() = a.transform.rotation.x;
+  q1.y() = a.transform.rotation.y;
+  q1.z() = a.transform.rotation.z;
+  q1.w() = a.transform.rotation.w;
+  q2.x() = b.transform.rotation.x;
+  q2.y() = b.transform.rotation.y;
+  q2.z() = b.transform.rotation.z;
+  q2.w() = b.transform.rotation.w;
+  Eigen::Quaterniond qError = q2.inverse() * q1;
+  error.transform.rotation.x = qError.x();
+  error.transform.rotation.y = qError.y();
+  error.transform.rotation.z = qError.z();
+  error.transform.rotation.w = qError.w();
+  return error;
 }
 
 void DVRKControl::dvrkPoseLeftCallback(
