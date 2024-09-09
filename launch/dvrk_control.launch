@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+  <!-- Publish robot state (base) as TF -->
+  <node name="dvrk_control" pkg="dvrk_control" type="dvrk_control_node" output="screen" respawn="true">
+    <rosparam command="load" file="$(find dvrk_control)/config/dvrk_control_params.yaml" />
+  </node>
+
+</launch>
