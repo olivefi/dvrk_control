@@ -111,9 +111,6 @@ geometry_msgs::WrenchStamped DVRKControl::createImpdCmd(const geometry_msgs::Tra
       desTwist.twist.linear.z - currTwist.twist.linear.z;
   Eigen::Vector3d posCmd  = pGainPos_ * posErr + dGainPos_ * velErr;
   cmd.header.stamp = ros::Time::now();
-  cmd.wrench.force.x = posCmd(0);
-  cmd.wrench.force.y = posCmd(1);
-  cmd.wrench.force.z = posCmd(2);
   Eigen::Quaterniond oriCurr, oriDes;
   oriCurr.x() = currPose.transform.rotation.x;
   oriCurr.y() = currPose.transform.rotation.y;
@@ -130,18 +127,19 @@ geometry_msgs::WrenchStamped DVRKControl::createImpdCmd(const geometry_msgs::Tra
       desTwist.twist.angular.z - currTwist.twist.angular.z;
   Eigen::Vector3d angvelCmd;
   angvelCmd = pGainOri_ * oriErr.angle() * oriCurr.toRotationMatrix() * oriErr.axis() + dGainOri_ * angvelErr;
+  cmd.wrench.force.x = posCmd(0);
+  cmd.wrench.force.y = posCmd(1);
+  cmd.wrench.force.z = posCmd(2);
   cmd.wrench.torque.x = angvelCmd(0);
   cmd.wrench.torque.y = angvelCmd(1);
   cmd.wrench.torque.z = angvelCmd(2);
-  ROS_INFO_STREAM("poscmd: " << posCmd.transpose());
-  ROS_INFO_STREAM("wrench: " << cmd.wrench.force.x << " " << cmd.wrench.force.y << " " << cmd.wrench.force.z);
   return cmd;
 }
 
 geometry_msgs::WrenchStamped DVRKControl::wrenchToDVRKFrame(
     const geometry_msgs::WrenchStamped &wrench,
     const geometry_msgs::TransformStamped &dvrkTrans) {
-  geometry_msgs::WrenchStamped dvrkWrench;
+  geometry_msgs::WrenchStamped dvrkWrench = wrench;
   dvrkWrench.header = wrench.header;
   Eigen::Vector3d force, torque;
   force << dvrkWrench.wrench.force.x, dvrkWrench.wrench.force.y,
