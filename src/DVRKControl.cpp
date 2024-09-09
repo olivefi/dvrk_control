@@ -131,9 +131,9 @@ geometry_msgs::WrenchStamped DVRKControl::createImpdCmd(const geometry_msgs::Tra
   cmd.wrench.force.x = posCmd(0);
   cmd.wrench.force.y = posCmd(1);
   cmd.wrench.force.z = posCmd(2);
-  // cmd.wrench.torque.x = angvelCmd(0);
-  // cmd.wrench.torque.y = angvelCmd(1);
-  // cmd.wrench.torque.z = angvelCmd(2);
+  cmd.wrench.torque.x = angvelCmd(0);
+  cmd.wrench.torque.y = angvelCmd(1);
+  cmd.wrench.torque.z = angvelCmd(2);
   return cmd;
 }
 
