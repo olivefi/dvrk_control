@@ -107,7 +107,6 @@ bool DVRKControl::update(const any_worker::WorkerEvent &event) {
     rightCmd = wrenchRight_;
   } else {
     ROS_ERROR_STREAM("[DVRKControl] Unknown control mode");
-    return false;
   }
 
   dvrkLeftWrenchPub_.publish(wrenchToDVRKFrame(leftCmd, rawDvrkPoseLeft_));
@@ -291,10 +290,10 @@ void DVRKControl::wrenchRightCallback(const geometry_msgs::WrenchStamped::ConstP
 }
 
 void DVRKControl::controlModeCallback(const std_msgs::String::ConstPtr &msg){
-  if(msg->data.c_str() == "pose"){
+  if(msg->data == "pose"){
     controlMode_ = ControlMode::POSE;
     ROS_INFO_STREAM("[DVRKControl] Control mode set to pose");
-  } else if(msg->data.c_str() == "wrench"){
+  } else if(msg->data == "wrench"){
     controlMode_ = ControlMode::WRENCH;
     ROS_INFO_STREAM("[DVRKControl] Control mode set to wrench");
   } else {
