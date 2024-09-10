@@ -293,10 +293,13 @@ void DVRKControl::wrenchRightCallback(const geometry_msgs::WrenchStamped::ConstP
 void DVRKControl::controlModeCallback(const std_msgs::String::ConstPtr &msg){
   if(msg->data.c_str() == "pose"){
     controlMode_ = ControlMode::POSE;
+    ROS_INFO_STREAM("[DVRKControl] Control mode set to pose");
   } else if(msg->data.c_str() == "wrench"){
     controlMode_ = ControlMode::WRENCH;
+    ROS_INFO_STREAM("[DVRKControl] Control mode set to wrench");
   } else {
     controlMode_ = ControlMode::UNKNOWN;
+    ROS_ERROR_STREAM("[DVRKControl] Unknown control mode");
   }
 }
 
