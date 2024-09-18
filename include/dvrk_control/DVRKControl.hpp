@@ -45,6 +45,7 @@ protected:
   double publishRate_;
   double pGainPos_, pGainOri_;
   double dGainPos_, dGainOri_;
+  std::vector<double> gainsScaling_;
 
   // Internal variables
   ControlMode controlMode_ = ControlMode::POSE;

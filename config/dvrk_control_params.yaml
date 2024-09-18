@@ -6,3 +6,7 @@ d_gain_pos: 2.5
 
 p_gain_ori: 0.01
 d_gain_ori: 0.0005
+
+# Gains scaling by direction
+# x, y, z, roll, pitch, yaw
+gains_scaling: [1, 1, 1, 1, 1, 1]

@@ -15,6 +15,7 @@ bool DVRKControl::init() {
   pGainOri_ = param<double>("p_gain_ori", 1);
   dGainPos_ = param<double>("d_gain_pos", 1);
   dGainOri_ = param<double>("d_gain_ori", 1);
+  gainsScaling_ = param<std::vector<double>>("gains_scaling", {1., 1., 1., 1., 1., 1.});
   // Initialize subscribers
   dvrkPoseLeftSub_ = nh_->subscribe(
       "/MTML/measured_cp", 1, &DVRKControl::dvrkPoseLeftCallback, this);
@@ -143,12 +144,13 @@ geometry_msgs::WrenchStamped DVRKControl::createImpdCmd(const geometry_msgs::Tra
       desTwist.twist.angular.z - currTwist.twist.angular.z;
   Eigen::Vector3d angvelCmd;
   angvelCmd = pGainOri_ * oriErr.angle() * oriCurr.toRotationMatrix() * oriErr.axis() + dGainOri_ * angvelErr;
-  cmd.wrench.force.x = posCmd(0);
-  cmd.wrench.force.y = posCmd(1);
-  cmd.wrench.force.z = posCmd(2);
-  cmd.wrench.torque.x = angvelCmd(0);
-  cmd.wrench.torque.y = angvelCmd(1);
-  cmd.wrench.torque.z = angvelCmd(2);
+  assert(gainsScaling_.size() == 6);
+  cmd.wrench.force.x = posCmd(0) * gainsScaling_[0];
+  cmd.wrench.force.y = posCmd(1) * gainsScaling_[1];
+  cmd.wrench.force.z = posCmd(2) * gainsScaling_[2];
+  cmd.wrench.torque.x = angvelCmd(0) * gainsScaling_[3];
+  cmd.wrench.torque.y = angvelCmd(1) * gainsScaling_[4];
+  cmd.wrench.torque.z = angvelCmd(2) * gainsScaling_[5];
   return cmd;
 }
 
